@@ -1,1 +1,8 @@
-name = snowplow
+name = Snowplow Analytics Tracker
+description = Implement basic server side tracking for snowplow analytics
+package = Statistics
+core = 7.x
+
+dependencies[] = libraries (>=2.0)
+
+configure = admin/config/system/snowplow
