@@ -3,7 +3,5 @@ description = Implmenents client side js tracker for snowplow analytics.
 package = Statistics
 core = 7.x
 
-
-
 configure = admin/config/system/snowplow/js
 
