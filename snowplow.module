@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * @file
+ * Snowplow module.
+ */
+
+/**
+ * Implements hook_libraries_info().
+ */
+function snowplow_libraries_info() {
+  $libraries['snowplow'] = array(
+    'name' => 'Snowplow Analytics Tracker',
+    'vendor url' => 'https://github.com/snowplow/snowplow-php-tracker',
+    'download url' => 'https://github.com/snowplow/snowplow-php-tracker/archive/master.zip',
+    'files' => array(
+      'php' => array(
+        'src/',
+        'src/',
+        'src/',
+        'src/',
+        'src/',
+        'src/',
+        'vendor/autoload.php',
+      ),
+    ),
+  );
+
+  return $libraries;
+}
+
+/**
+ * Implements hook_user_create().
+ */
+function snowplow_user_create() {
+
+}
+
+/**
+ * Implements hook_user_login().
+ */
+function snowplow_user_logn(&$edit, $account) {
+
+}
+
+/**
+ * Implements hook_user_logout().
+ */
+function snowplow_user_logout($account) {
+
+}
