@@ -6,6 +6,25 @@
  */
 
 /**
+ * Implements hook_menu().
+ */
+function snowplow_menu() {
+  $items = array();
+
+  $items['admin/config/system/snowplow'] = array(
+    'title' => 'Snowplow Analytics',
+    'description' => 'Configure tracking behavior for snowplow analytics.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('snowplow_admin_settings_form'),
+    'access arguments' => array('administer snowplow analytics'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'snowplow.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
  * Implements hook_libraries_info().
  */
 function snowplow_libraries_info() {
@@ -15,12 +34,15 @@ function snowplow_libraries_info() {
     'download url' => 'https://github.com/snowplow/snowplow-php-tracker/archive/master.zip',
     'files' => array(
       'php' => array(
-        'src/',
-        'src/',
-        'src/',
-        'src/',
-        'src/',
-        'src/',
+        'src/Constants.php',
+        'src/Emitters.php',
+        'src/Payload.php',
+        'src/Subject.php',
+        'src/Tracker.php',
+        'src/Emitters/CurlEmitter.php',
+        'src/Emitters/FileEmitter.php',
+        'src/Emitters/SocketEmitter.php',
+        'src/Emitters/SyncEmitter.php',
         'vendor/autoload.php',
       ),
     ),
@@ -48,4 +70,16 @@ function snowplow_user_logn(&$edit, $account) {
  */
 function snowplow_user_logout($account) {
 
+}
+
+/**
+ * Implements hook_permission().
+ */
+function snowplow_permission() {
+  return array(
+    'administer snowplow analytics' => array(
+      'title' => t('Administer Snowplow Analytics'),
+      'description' => t('Change the tracking settings for Snowplow analytics.'),
+    ),
+  );
 }
