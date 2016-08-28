@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Snowplow javascript module adds the js tracker to pages.
+ */
+
+// API call to get latest version of snowplow js.
+// api.github.com/repos/snowplow/snowplow-javascript-tracker/releases
+/**
+ * Implements hook_form_alter().
+ */
+function snowplow_form_alter(&$form, &$form_state, $form_id) {
+  $form['attached'] = "Add some js here for form tracking";
+}
