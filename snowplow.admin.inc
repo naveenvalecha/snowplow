@@ -6,9 +6,10 @@
  */
 
 /**
- * Implements hook_admin_settings() for module settings configuration.
+ * Implements hook_admin_settings(). for module settings configuration.
  */
 function snowplow_admin_settings_form($form_state) {
+
   $form['app'] = array(
     '#type' => 'fieldset',
     '#title' => t('General settings'),
@@ -21,7 +22,17 @@ function snowplow_admin_settings_form($form_state) {
     '#size' => 15,
     '#maxlength' => 20,
     '#required' => TRUE,
-    '#description' => t('This id will be set on the Javascript tracker.'),
+    '#description' => t('This id will be set on the tracker.'),
+  );
+
+  $form['app']['snowplow_app_endpoint'] = array(
+    '#title' => t('Endpoint URL'),
+    '#type' => 'textfield',
+    '#default_value' => variable_get('snowplow_app_endpoint', ''),
+    '#size' => 128,
+    '#maxlength' => 255,
+    '#required' => TRUE,
+    '#description' => t('Enter the endpoint where the events will be tracked too.'),
   );
 
   // Visibility settings.
@@ -29,6 +40,7 @@ function snowplow_admin_settings_form($form_state) {
     '#type' => 'item',
     '#title' => t('Tracking scope'),
   );
+
   $form['tracking'] = array(
     '#type' => 'vertical_tabs',
     '#attached' => array(
@@ -452,7 +464,7 @@ function snowplow_admin_settings_form($form_state) {
   $form['advanced']['codesnippet']['googleanalytics_codesnippet_create'] = array(
     '#type' => 'textarea',
     '#title' => t('Create only fields'),
-    '#default_value' => _googleanalytics_get_name_value_string(variable_get('googleanalytics_codesnippet_create', array())),
+    '#default_value' => variable_get('googleanalytics_codesnippet_create', ''),
     '#rows' => 5,
     '#description' => t('Enter one value per line, in the format name|value. Settings in this textarea will be added to <code>ga("create", "UA-XXXX-Y", {"name":"value"});</code>. For more information, read <a href="@url">create only fields</a> documentation in the Analytics.js field reference.', array('@url' => 'https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference#create')),
     '#element_validate' => array('googleanalytics_validate_create_field_values'),
@@ -482,417 +494,6 @@ function snowplow_admin_settings_form($form_state) {
   );
 
   return system_settings_form($form);
+
 }
 
-/**
- * Implements _form_validate().
- */
-function googleanalytics_admin_settings_form_validate($form, &$form_state) {
-  // Trim custom dimensions and metrics.
-  foreach ($form_state['values']['googleanalytics_custom_dimension']['indexes'] as $dimension) {
-    $form_state['values']['googleanalytics_custom_dimension']['indexes'][$dimension['index']]['value'] = trim($dimension['value']);
-    // Remove empty values from the array.
-    if (!drupal_strlen($form_state['values']['googleanalytics_custom_dimension']['indexes'][$dimension['index']]['value'])) {
-      unset($form_state['values']['googleanalytics_custom_dimension']['indexes'][$dimension['index']]);
-    }
-  }
-  $form_state['values']['googleanalytics_custom_dimension'] = $form_state['values']['googleanalytics_custom_dimension']['indexes'];
-
-  foreach ($form_state['values']['googleanalytics_custom_metric']['indexes'] as $metric) {
-    $form_state['values']['googleanalytics_custom_metric']['indexes'][$metric['index']]['value'] = trim($metric['value']);
-    // Remove empty values from the array.
-    if (!drupal_strlen($form_state['values']['googleanalytics_custom_metric']['indexes'][$metric['index']]['value'])) {
-      unset($form_state['values']['googleanalytics_custom_metric']['indexes'][$metric['index']]);
-    }
-  }
-  $form_state['values']['googleanalytics_custom_metric'] = $form_state['values']['googleanalytics_custom_metric']['indexes'];
-
-  // Trim some text values.
-  $form_state['values']['googleanalytics_account'] = trim($form_state['values']['googleanalytics_account']);
-  $form_state['values']['googleanalytics_pages'] = trim($form_state['values']['googleanalytics_pages']);
-  $form_state['values']['googleanalytics_cross_domains'] = trim($form_state['values']['googleanalytics_cross_domains']);
-  $form_state['values']['googleanalytics_codesnippet_create'] = _googleanalytics_extract_create_field_values($form_state['values']['googleanalytics_codesnippet_create']);
-  $form_state['values']['googleanalytics_codesnippet_before'] = trim($form_state['values']['googleanalytics_codesnippet_before']);
-  $form_state['values']['googleanalytics_codesnippet_after'] = trim($form_state['values']['googleanalytics_codesnippet_after']);
-
-  // Replace all type of dashes (n-dash, m-dash, minus) with the normal dashes.
-  $form_state['values']['googleanalytics_account'] = str_replace(array('–', '—', '−'), '-', $form_state['values']['googleanalytics_account']);
-
-  if (!preg_match('/^UA-\d+-\d+$/', $form_state['values']['googleanalytics_account'])) {
-    form_set_error('googleanalytics_account', t('A valid Google Analytics Web Property ID is case sensitive and formatted like UA-xxxxxxx-yy.'));
-  }
-
-  // If multiple top-level domains has been selected, a domain names list is required.
-  if ($form_state['values']['googleanalytics_domain_mode'] == 2 && empty($form_state['values']['googleanalytics_cross_domains'])) {
-    form_set_error('googleanalytics_cross_domains', t('A list of top-level domains is required if <em>Multiple top-level domains</em> has been selected.'));
-  }
-  // Clear the domain list if cross domains are disabled.
-  if ($form_state['values']['googleanalytics_domain_mode'] != 2) {
-    $form_state['values']['googleanalytics_cross_domains'] = '';
-  }
-
-  // Disallow empty list of download file extensions.
-  if ($form_state['values']['googleanalytics_trackfiles'] && empty($form_state['values']['googleanalytics_trackfiles_extensions'])) {
-    form_set_error('googleanalytics_trackfiles_extensions', t('List of download file extensions cannot empty.'));
-  }
-  // Clear obsolete local cache if cache has been disabled.
-  if (empty($form_state['values']['googleanalytics_cache']) && $form['advanced']['googleanalytics_cache']['#default_value']) {
-    googleanalytics_clear_js_cache();
-  }
-
-  // This is for the Newbie's who cannot read a text area description.
-  if (stristr($form_state['values']['googleanalytics_codesnippet_before'], 'google-analytics.com/analytics.js')) {
-    form_set_error('googleanalytics_codesnippet_before', t('Do not add the tracker code provided by Google into the javascript code snippets! This module already builds the tracker code based on your Google Analytics account number and settings.'));
-  }
-  if (stristr($form_state['values']['googleanalytics_codesnippet_after'], 'google-analytics.com/analytics.js')) {
-    form_set_error('googleanalytics_codesnippet_after', t('Do not add the tracker code provided by Google into the javascript code snippets! This module already builds the tracker code based on your Google Analytics account number and settings.'));
-  }
-  if (preg_match('/(.*)<\/?script(.*)>(.*)/i', $form_state['values']['googleanalytics_codesnippet_before'])) {
-    form_set_error('googleanalytics_codesnippet_before', t('Do not include the &lt;script&gt; tags in the javascript code snippets.'));
-  }
-  if (preg_match('/(.*)<\/?script(.*)>(.*)/i', $form_state['values']['googleanalytics_codesnippet_after'])) {
-    form_set_error('googleanalytics_codesnippet_after', t('Do not include the &lt;script&gt; tags in the javascript code snippets.'));
-  }
-}
-
-/**
- * Layout for the custom variables table in the admin settings form.
- *
- * @param array $variables
- *   An array contains the form elements.
- *
- * @return string
- *   The rendered output.
- */
-function theme_googleanalytics_admin_custom_var_table($variables) {
-  $form = $variables['form'];
-
-  $header = array(
-    array('data' => t('Index')),
-    array('data' => t('Value')),
-  );
-
-  $rows = array();
-  foreach (element_children($form['indexes']) as $id) {
-    $rows[] = array(
-      'data' => array(
-        drupal_render($form['indexes'][$id]['index']),
-        drupal_render($form['indexes'][$id]['value']),
-      ),
-    );
-  }
-
-  $output = theme('table', array('header' => $header, 'rows' => $rows));
-  $output .= drupal_render($form['googleanalytics_description']);
-  if (isset($form['googleanalytics_token_tree'])) {
-    $output .= drupal_render($form['googleanalytics_token_tree']);
-  }
-
-  return $output;
-}
-
-/**
- * Validate a form element that should have tokens in it.
- *
- * For example:
- * @code
- * $form['my_node_text_element'] = array(
- *   '#type' => 'textfield',
- *   '#title' => t('Some text to token-ize that has a node context.'),
- *   '#default_value' => 'The title of this node is [node:title].',
- *   '#element_validate' => array('googleanalytics_token_element_validate'),
- * );
- * @endcode
- */
-function googleanalytics_token_element_validate(&$element, &$form_state) {
-  $value = isset($element['#value']) ? $element['#value'] : $element['#default_value'];
-
-  if (!drupal_strlen($value)) {
-    // Empty value needs no further validation since the element should depend
-    // on using the '#required' FAPI property.
-    return $element;
-  }
-
-  $tokens = token_scan($value);
-  $invalid_tokens = _googleanalytics_get_forbidden_tokens($tokens);
-  if ($invalid_tokens) {
-    form_error($element, t('The %element-title is using the following forbidden tokens with personal identifying information: @invalid-tokens.', array('%element-title' => $element['#title'], '@invalid-tokens' => implode(', ', $invalid_tokens))));
-  }
-
-  return $element;
-}
-
-/**
- * @param array $value
- *   An array of token values.
- *
- * @return array
- *   A unique array of invalid tokens.
- */
-function _googleanalytics_get_forbidden_tokens($value) {
-  $invalid_tokens = array();
-  $value_tokens = is_string($value) ? token_scan($value) : $value;
-
-  foreach ($value_tokens as $tokens) {
-    if (array_filter($tokens, '_googleanalytics_contains_forbidden_token')) {
-      $invalid_tokens = array_merge($invalid_tokens, array_values($tokens));
-    }
-  }
-
-  array_unique($invalid_tokens);
-  return $invalid_tokens;
-}
-
-/**
- * Validate if a string contains forbidden tokens not allowed by privacy rules.
- *
- * @param string $token_string
- *   A string with one or more tokens to be validated.
- *
- * @return boolean
- *   TRUE if blacklisted token has been found, otherwise FALSE.
- */
-function _googleanalytics_contains_forbidden_token($token_string) {
-  // List of strings in tokens with personal identifying information not allowed
-  // for privacy reasons. See section 8.1 of the Google Analytics terms of use
-  // for more detailed information.
-  //
-  // This list can never ever be complete. For this reason it tries to use a
-  // regex and may kill a few other valid tokens, but it's the only way to
-  // protect users as much as possible from admins with illegal ideas.
-  //
-  // User tokens are not prefixed with colon to catch 'current-user' and 'user'.
-  //
-  // TODO: If someone have better ideas, share them, please!
-  $token_blacklist = array(
-    ':author]',
-    ':author:edit-url]',
-    ':author:url]',
-    ':author:path]',
-    ':current-user]',
-    ':current-user:original]',
-    ':fid]',
-    ':mail]',
-    ':name]',
-    ':uid]',
-    ':one-time-login-url]',
-    ':owner]',
-    ':owner:cancel-url]',
-    ':owner:edit-url]',
-    ':owner:url]',
-    ':owner:path]',
-    'user:cancel-url]',
-    'user:edit-url]',
-    'user:url]',
-    'user:path]',
-    'user:picture]',
-    // addressfield_tokens.module
-    ':first-name]',
-    ':last-name]',
-    ':name-line]',
-    ':mc-address]',
-    ':thoroughfare]',
-    ':premise]',
-    // realname.module
-    ':name-raw]',
-    // token.module
-    ':ip-address]',
-  );
-
-  return preg_match('/' . implode('|', array_map('preg_quote', $token_blacklist)) . '/i', $token_string);
-}
-
-/**
- * #element_validate callback for create only fields.
- *
- * @param $element
- *   An associative array containing the properties and children of the
- *   generic form element.
- * @param $form_state
- *   The $form_state array for the form this element belongs to.
- *
- * @see form_process_pattern()
- */
-function googleanalytics_validate_create_field_values(&$element, &$form_state) {
-  $values = _googleanalytics_extract_create_field_values($element['#value']);
-
-  if (!is_array($values)) {
-    form_error($element, t('The %element-title field contains invalid input.', array('%element-title' => $element['#title'])));
-  }
-  else {
-    // Check that name and value are valid for the field type.
-    foreach ($values as $name => $value) {
-      if ($error = _googleanalytics_validate_create_field_name($name)) {
-        form_error($element, $error);
-        break;
-      }
-      if ($error = _googleanalytics_validate_create_field_value($value)) {
-        form_error($element, $error);
-        break;
-      }
-    }
-
-    return $element;
-  }
-}
-
-/**
- * Extracts the values array from the element.
- *
- * @param string $string
- *   The raw string to extract values from.
- *
- * @return array|null
- *   The array of extracted key/value pairs, or NULL if the string is invalid.
- *
- * @see \Drupal\options\Plugin\Field\FieldType\ListTextItem::allowedValuesString()
- */
-function _googleanalytics_extract_create_field_values($string) {
-  $values = array();
-
-  $list = explode("\n", $string);
-  $list = array_map('trim', $list);
-  $list = array_filter($list, 'strlen');
-
-  foreach ($list as $text) {
-    // Check for an explicit key.
-    $matches = array();
-    if (preg_match('/(.*)\|(.*)/', $text, $matches)) {
-      // Trim key and value to avoid unwanted spaces issues.
-      $name = trim($matches[1]);
-      $value = trim($matches[2]);
-    }
-    else {
-      return;
-    }
-
-    $values[$name] = $value;
-  }
-
-  return _googleanalytics_convert_form_value_data_types($values);
-}
-
-/**
- * Checks whether a field name is valid.
- *
- * @param string $name
- *   The option value entered by the user.
- *
- * @return string
- *   The error message if the specified value is invalid, NULL otherwise.
- */
-function _googleanalytics_validate_create_field_name($name) {
-  // List of supported field names:
-  // https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference#create
-  $create_only_fields = array(
-    'clientId',
-    'userId',
-    'sampleRate',
-    'siteSpeedSampleRate',
-    'alwaysSendReferrer',
-    'allowAnchor',
-    'cookieName',
-    'cookieDomain',
-    'cookieExpires',
-    'legacyCookieDomain',
-  );
-
-  if ($name == 'name') {
-    return t('Create only field name %name is a disallowed field name. Changing the <em>Tracker Name</em> is currently not supported.', array('%name' => $name));
-  }
-  if ($name == 'allowLinker') {
-    return t('Create only field name %name is a disallowed field name. Please select <em>Multiple top-level domains</em> under <em>What are you tracking</em> to enable cross domain tracking.', array('%name' => $name));
-  }
-  if (!in_array($name, $create_only_fields)) {
-    return t('Create only field name %name is an unknown field name. Field names are case sensitive. Please see <a href="@url">create only fields</a> documentation for supported field names.', array('%name' => $name, '@url' => 'https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference#create'));
-  }
-}
-
-/**
- * Checks whether a field value is valid.
- *
- * @param string $value
- *   The option value entered by the user.
- *
- * @return string
- *   The error message if the specified value is invalid, NULL otherwise.
- */
-function _googleanalytics_validate_create_field_value($value) {
-  if (!is_bool($value) && !drupal_strlen($value)) {
-    return t('A create only field requires a value.');
-  }
-  if (drupal_strlen($value) > 255) {
-    return t('The value of a create only field must be a string at most 255 characters long.');
-  }
-}
-
-/**
- * Generates a string representation of an array.
- *
- * This string format is suitable for edition in a textarea.
- *
- * @param array $values
- *   An array of values, where array keys are values and array values are
- *   labels.
- *
- * @return string
- *   The string representation of the $values array:
- *    - Values are separated by a carriage return.
- *    - Each value is in the format "name|value" or "value".
- */
-function _googleanalytics_get_name_value_string($values) {
-  $lines = array();
-  foreach ($values as $name => $value) {
-    // Convert data types.
-    // @todo: #2251377: Json utility class serializes boolean values to incorrect data type
-    if (is_bool($value)) {
-      $value = ($value) ? 'true' : 'false';
-    }
-
-    $lines[] = "$name|$value";
-  }
-  return implode("\n", $lines);
-}
-
-/**
- * Prepare form data types for Json conversion.
- *
- * @param array $values
- *   Array of name/value pairs.
- *
- * @return array
- *   Array of name/value pairs with casted data types.
- */
-function _googleanalytics_convert_form_value_data_types($values) {
-
-  foreach ($values as $name => $value) {
-    // Convert data types.
-    // @todo: #2251377: Json utility class serializes boolean values to incorrect data type
-    $match = drupal_strtolower($value);
-    if ($match == 'true') {
-      $value = TRUE;
-    }
-    elseif ($match == 'false') {
-      $value = FALSE;
-    }
-
-    // Convert other known fields.
-    // @todo: #2251343: Json utility class serializes numeric values to incorrect data type
-    switch ($name) {
-      case 'sampleRate':
-        // Float
-        settype($value, 'float');
-        break;
-
-      case 'siteSpeedSampleRate':
-      case 'cookieExpires':
-        // Integer
-        settype($value, 'integer');
-        break;
-    }
-
-    $values[$name] = $value;
-  }
-
-  return $values;
-}
