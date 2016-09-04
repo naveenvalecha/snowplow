@@ -77,7 +77,7 @@ function snowplow_user_login(&$edit, $account) {
  */
 function snowplow_user_logout($account) {
   $snowplow_tracker = snowplow_get_api_object();
-  $snowplow_tracker->trackStructEvent("user", "logOut");
+  $snowplow_tracker->trackStructEvent("user", "logout");
   $snowplow_tracker->flushEmitters();
 }
 
@@ -93,7 +93,12 @@ function snowplow_permission() {
   );
 }
 
+/**
+ * Get an instance of the Snoplow API tracker object.
+ * @return [type] [description]
+ */
 function snowplow_get_api_object() {
+  // Load snowplow Library.
   $library = libraries_load('snowplow');
   if (!$library['installed']) {
     $msg = t('Failed to load Snowplow PHP library. Please refer to the installation requirements.');
@@ -101,17 +106,18 @@ function snowplow_get_api_object() {
     drupal_set_message($msg, 'error', FALSE);
     return NULL;
   }
-  // Get the collecor URL
+  // Get the collecor URL.
   $collector_uri = variable_get('snowplow_app_endpoint', '');
   // Create a new emitter object.
-  $emitter = new Snowplow\Tracker\Emitters\CurlEmitter('http://requestb.in/1baacb01', '', false, "POST", 2);
-  // // Setup the subject (object being tracked);
+  $emitter = new Snowplow\Tracker\Emitters\CurlEmitter($collector_uri, FALSE, "GET", 2, 2, TRUE);
+  // Setup the subject (object being tracked);
   $subject = new Snowplow\Tracker\Subject();
-  $subject->setPlatform("drupal");
-  // // Set user ID on the this object.
+  // Set user ID on the this object.
   $subject->setUserId(1);
   // Create a tracker object.
-  $tracker = new Snowplow\Tracker\Tracker($emitter, $subject);
+  $tracker = new Snowplow\Tracker\Tracker($emitter, $subject, 'namespace', 'app_id');
 
   return $tracker;
 }
+
+
