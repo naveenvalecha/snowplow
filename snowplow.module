@@ -107,15 +107,17 @@ function snowplow_get_api_object() {
     return NULL;
   }
   // Get the collecor URL.
-  $collector_uri = variable_get('snowplow_app_endpoint', '');
+  $sp_collector_uri = variable_get('snowplow_app_endpoint', '');
+  // Ge the App Id.
+  $sp_app_id = variable_get('snowplow_app_id', 'APP-ID');
   // Create a new emitter object.
-  $emitter = new Snowplow\Tracker\Emitters\CurlEmitter($collector_uri, FALSE, "GET", 2, 2, TRUE);
+  $emitter = new Snowplow\Tracker\Emitters\CurlEmitter($sp_collector_uri, FALSE, "GET", 2, 2, TRUE);
   // Setup the subject (object being tracked);
   $subject = new Snowplow\Tracker\Subject();
   // Set user ID on the this object.
-  $subject->setUserId(1);
+  $subject->setUserId($user->uid);
   // Create a tracker object.
-  $tracker = new Snowplow\Tracker\Tracker($emitter, $subject, 'namespace', 'app_id');
+  $tracker = new Snowplow\Tracker\Tracker($emitter, $subject, 'namespace', $sp_app_id);
 
   return $tracker;
 }
