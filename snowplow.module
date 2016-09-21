@@ -60,28 +60,35 @@ function snowplow_libraries_info() {
  * Implements hook_user_create().
  */
 function snowplow_user_insert(&$edit, $account, $category) {
-  // Get an object.
-  $snowplow_tracker = snowplow_get_api_object();
-  $snowplow_tracker->trackStructEvent("user", "new", "user", "uid", $account->uid);
-  $snowplow_tracker->flushEmitters();
+  // Check new user tracking is enabled.
+  if (variable_get('snowplow_track_new_user')) {
+    // Get an object.
+    $snowplow_tracker = snowplow_get_api_object();
+    $snowplow_tracker->trackStructEvent("user", "new", "user", "uid", $account->uid);
+    $snowplow_tracker->flushEmitters();
+  }
 }
 
 /**
  * Implements hook_user_login().
  */
 function snowplow_user_login(&$edit, $account) {
-  $snowplow_tracker = snowplow_get_api_object();
-  $snowplow_tracker->trackStructEvent("user", "login", "user", "uid", $account->uid);
-  $snowplow_tracker->flushEmitters();
+  if (variable_get('snowplow_track_login')) {
+    $snowplow_tracker = snowplow_get_api_object();
+    $snowplow_tracker->trackStructEvent("user", "login", "user", "uid", $account->uid);
+    $snowplow_tracker->flushEmitters();
+  }
 }
 
 /**
  * Implements hook_user_logout().
  */
 function snowplow_user_logout($account) {
-  $snowplow_tracker = snowplow_get_api_object();
-  $snowplow_tracker->trackStructEvent("user", "logout", "user", "uid", $account->uid);
-  $snowplow_tracker->flushEmitters();
+  if (variable_get('snowplow_track_logout')) {
+    $snowplow_tracker = snowplow_get_api_object();
+    $snowplow_tracker->trackStructEvent("user", "logout", "user", "uid", $account->uid);
+    $snowplow_tracker->flushEmitters();
+  }
 }
 
 /**
