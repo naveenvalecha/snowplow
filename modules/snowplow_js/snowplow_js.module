@@ -5,17 +5,34 @@
  * Snowplow javascript module adds the js tracker to pages.
  */
 
-// API call to get latest version of snowplow js.
-// api.github.com/repos/snowplow/snowplow-javascript-tracker/releases
+/**
+ * Implemenets hook_menu().
+ */
+function snowplow_js_menu() {
+
+  $items['admin/config/system/snowplow/javascript'] = array(
+    'title' => 'Javascript',
+    'description' => 'Configure tracking behavior for snowplow analytics.',
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'snowplow_js.admin.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('snowplow_js_admin_settings_form'),
+    'access arguments' => array('administer snowplow analytics'),
+  );
+
+  return $items;
+}
+
 /**
  * Implements hook_form_alter().
  */
-function snowplow_js_form_snowplow_admin_settings_alter(&$form, &$form_state, $form_id) {
-  //var_dump($form_id);
-  //$form['attached'] = "Add some js here for form tracking";
-}
+function snowplow_js_form_snowplow_admin_settings_form_alter(&$form, &$form_state, $form_id) {
 
-function snowplow_js_form_alter(&$form, &$form_state, $form_id) {
-  //var_dump($form_id);
+  $form['tracking']['add_js_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Add Javascript'),
+  );
+
+  return($form);
 }
 
