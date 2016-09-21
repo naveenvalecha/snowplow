@@ -60,7 +60,10 @@ function snowplow_libraries_info() {
  * Implements hook_user_create().
  */
 function snowplow_user_insert(&$edit, $account, $category) {
+  // Get an object.
   $snowplow_tracker = snowplow_get_api_object();
+  $snowplow_tracker->trackStructEvent("user", "new", "user", "uid", $account->uid);
+  $snowplow_tracker->flushEmitters();
 }
 
 /**
@@ -68,7 +71,7 @@ function snowplow_user_insert(&$edit, $account, $category) {
  */
 function snowplow_user_login(&$edit, $account) {
   $snowplow_tracker = snowplow_get_api_object();
-  $snowplow_tracker->trackStructEvent("user", "login");
+  $snowplow_tracker->trackStructEvent("user", "login", "user", "uid", $account->uid);
   $snowplow_tracker->flushEmitters();
 }
 
@@ -77,7 +80,7 @@ function snowplow_user_login(&$edit, $account) {
  */
 function snowplow_user_logout($account) {
   $snowplow_tracker = snowplow_get_api_object();
-  $snowplow_tracker->trackStructEvent("user", "logout");
+  $snowplow_tracker->trackStructEvent("user", "logout", "user", "uid", $account->uid);
   $snowplow_tracker->flushEmitters();
 }
 
@@ -98,6 +101,7 @@ function snowplow_permission() {
  * @return [type] [description]
  */
 function snowplow_get_api_object() {
+  GLOBAL $user;
   // Load snowplow Library.
   $library = libraries_load('snowplow');
   if (!$library['installed']) {
