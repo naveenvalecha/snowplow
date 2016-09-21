@@ -10,7 +10,7 @@ respective README's for more details.
 ## Installation Notes
   * You need to have add an APP-ID or the module will use the sitename transliterated.
 
-  * The MailChimp PHP library must exist in your libraries directory.
+  * The Snowplow PHP library must exist in your libraries directory.
 
       - Download Composer if you don't already have it installed:
         https://getcomposer.org/download/
