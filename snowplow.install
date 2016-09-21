@@ -1,9 +1,22 @@
 <?php
 
 /**
+ * Implements hook_install().
+ */
+function snowplow_install() {
+  // Setup default variables.
+  variable_set('snowplow_track_login', TRUE);
+  variable_set('snowplow_track_logout', TRUE);
+  variable_set('snowplow_track_new_user', TRUE);
+}
+
+/**
  * Implements hook_uninstall().
  */
-function mailchimp_uninstall() {
+function snowplow_uninstall() {
   variable_del('snowplow_app_endpoint');
   variable_del('snowplow_app_id');
+  variable_del('snowplow_track_login');
+  variable_del('snowplow_track_logout');
+  variable_del('snowplow_track_new_user');
 }
