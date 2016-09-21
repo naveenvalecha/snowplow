@@ -38,7 +38,7 @@ respective README's for more details.
             - composer.json
             - README.md
 
-      - In the mailchimp library directory, run:
+      - In the snowplow library directory, run:
         composer install
 
 ## Configuration
