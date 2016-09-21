@@ -47,62 +47,20 @@ function snowplow_admin_settings_form($form_state) {
       'js' => array(drupal_get_path('module', 'googleanalytics') . '/googleanalytics.admin.js'),
     ),
   );
-
-  $form['tracking']['domain_tracking'] = array(
+  $form['tracking']['login_tracking'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Domains'),
+    '#title' => t('Login'),
   );
 
-  global $cookie_domain;
-  $multiple_sub_domains = array();
-  foreach (array('www', 'app', 'shop') as $subdomain) {
-    if (count(explode('.', $cookie_domain)) > 2 && !is_numeric(str_replace('.', '', $cookie_domain))) {
-      $multiple_sub_domains[] = $subdomain . $cookie_domain;
-    }
-    // IP addresses or localhost.
-    else {
-      $multiple_sub_domains[] = $subdomain . '.example.com';
-    }
-  }
-
-  $multiple_toplevel_domains = array();
-  foreach (array('.com', '.net', '.org') as $tldomain) {
-    $host = $_SERVER['HTTP_HOST'];
-    $domain = substr($host, 0, strrpos($host, '.'));
-    if (count(explode('.', $host)) > 2 && !is_numeric(str_replace('.', '', $host))) {
-      $multiple_toplevel_domains[] = $domain . $tldomain;
-    }
-    // IP addresses or localhost
-    else {
-      $multiple_toplevel_domains[] = 'www.example' . $tldomain;
-    }
-  }
-
-  $form['tracking']['domain_tracking']['googleanalytics_domain_mode'] = array(
-    '#type' => 'radios',
-    '#title' => t('What are you tracking?'),
-    '#options' => array(
-      0 => t('A single domain (default)') . '<div class="description">' . t('Domain: @domain', array('@domain' => $_SERVER['HTTP_HOST'])) . '</div>',
-      1 => t('One domain with multiple subdomains') . '<div class="description">' . t('Examples: @domains', array('@domains' => implode(', ', $multiple_sub_domains))) . '</div>',
-      2 => t('Multiple top-level domains') . '<div class="description">' . t('Examples: @domains', array('@domains' => implode(', ', $multiple_toplevel_domains))) . '</div>',
-    ),
-    '#default_value' => variable_get('googleanalytics_domain_mode', 0),
-  );
-  $form['tracking']['domain_tracking']['googleanalytics_cross_domains'] = array(
-    '#title' => t('List of top-level domains'),
-    '#type' => 'textarea',
-    '#default_value' => variable_get('googleanalytics_cross_domains', ''),
-    '#description' => t('If you selected "Multiple top-level domains" above, enter all related top-level domains. Add one domain per line. By default, the data in your reports only includes the path and name of the page, and not the domain name. For more information see section <em>Show separate domain names</em> in <a href="@url">Tracking Multiple Domains</a>.', array('@url' => 'https://support.google.com/analytics/answer/1034342')),
-    '#states' => array(
-      'enabled' => array(
-        ':input[name="googleanalytics_domain_mode"]' => array('value' => '2'),
-      ),
-      'required' => array(
-        ':input[name="googleanalytics_domain_mode"]' => array('value' => '2'),
-      ),
-    ),
+    $form['tracking']['logout_tracking'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Logout'),
   );
 
+  $form['tracking']['new_user_tracking'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('New User'),
+  );
   // Message specific configurations.
   $form['tracking']['messagetracking'] = array(
     '#type' => 'fieldset',
