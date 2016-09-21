@@ -44,7 +44,7 @@ function snowplow_admin_settings_form($form_state) {
   $form['tracking'] = array(
     '#type' => 'vertical_tabs',
     '#attached' => array(
-      'js' => array(drupal_get_path('module', 'googleanalytics') . '/googleanalytics.admin.js'),
+      'js' => array(drupal_get_path('module', 'snowplow') . '/snowplow.admin.js'),
     ),
   );
   $form['tracking']['login_tracking'] = array(
