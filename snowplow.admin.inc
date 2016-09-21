@@ -32,7 +32,7 @@ function snowplow_admin_settings_form($form_state) {
     '#size' => 128,
     '#maxlength' => 255,
     '#required' => TRUE,
-    '#description' => t('Enter the endpoint where the events will be tracked too.'),
+    '#description' => t('Enter the endpoint where the events will be tracked, the format of this url is important and will be the most common cause of missing events if incorrectly tracked. (Leave off the http://)'),
   );
 
   // Visibility settings.
@@ -52,7 +52,7 @@ function snowplow_admin_settings_form($form_state) {
     '#title' => t('Login'),
   );
 
-    $form['tracking']['logout_tracking'] = array(
+  $form['tracking']['logout_tracking'] = array(
     '#type' => 'fieldset',
     '#title' => t('Logout'),
   );
