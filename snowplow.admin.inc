@@ -58,7 +58,6 @@ function snowplow_admin_settings_form($form_state) {
     '#title' => t('Track logins?'),
     '#default_value' => variable_get('snowplow_track_login', TRUE),
     '#description' => t('Track user logins to snowplow.'),
-    ),
   );
 
   $form['tracking']['logout_tracking'] = array(
@@ -71,7 +70,6 @@ function snowplow_admin_settings_form($form_state) {
     '#title' => t('Track logouts?'),
     '#default_value' => variable_get('snowplow_track_logout', TRUE),
     '#description' => t('Track user logouts to snowplow.'),
-    ),
   );
 
   $form['tracking']['new_user_tracking'] = array(
@@ -84,21 +82,12 @@ function snowplow_admin_settings_form($form_state) {
     '#title' => t('Track new users?'),
     '#default_value' => variable_get('snowplow_track_new_user', TRUE),
     '#description' => t('Track new user registrations to snowplow'),
-    ),
   );
 
   // Message specific configurations.
   $form['tracking']['messagetracking'] = array(
     '#type' => 'fieldset',
     '#title' => t('Messages'),
-  );
-
-  $form['tracking']['login_tracking']['snowplow_trackmessages'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Track messages of type'),
-    '#default_value' => variable_get('snowplow_track_login', TRUE),
-    '#description' => t('Track user messages to snowplow'),
-    ),
   );
 
   $form['tracking']['messagetracking']['snowplow_trackmessages'] = array(
