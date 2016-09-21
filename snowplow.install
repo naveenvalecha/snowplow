@@ -1,0 +1,9 @@
+<?php
+
+/**
+ * Implements hook_uninstall().
+ */
+function mailchimp_uninstall() {
+  variable_del('snowplow_app_endpoint');
+  variable_del('snowplow_app_id');
+}
