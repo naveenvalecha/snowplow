@@ -6,7 +6,7 @@
  */
 
 /**
- * Implements hook_admin_settings(). for module settings configuration.
+ * Implements hook_admin_settings().
  */
 function snowplow_admin_settings_form($form_state) {
 
@@ -105,4 +105,3 @@ function snowplow_admin_settings_form($form_state) {
   return system_settings_form($form);
 
 }
-
