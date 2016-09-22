@@ -36,7 +36,7 @@ function snowplow_libraries_info() {
       'file' => 'CHANGELOG',
       'pattern' => "@Version\s+([0-9a-zA-Z\.-]+)@",
       'lines' => 5,
-      ),
+    ),
     'files' => array(
       'php' => array(
         'src/Constants.php',
@@ -105,10 +105,12 @@ function snowplow_permission() {
 
 /**
  * Get an instance of the Snoplow API tracker object.
- * @return [type] [description]
+ *
+ * @return object
+ *   Returns a snowplow tracker object.
  */
 function snowplow_get_api_object() {
-  GLOBAL $user;
+  global $user;
   // Load snowplow Library.
   $library = libraries_load('snowplow');
   if (!$library['installed']) {
@@ -123,7 +125,7 @@ function snowplow_get_api_object() {
   $sp_app_id = variable_get('snowplow_app_id', 'APP-ID');
   // Create a new emitter object.
   $emitter = new Snowplow\Tracker\Emitters\CurlEmitter($sp_collector_uri, FALSE, "GET", 2, 2, TRUE);
-  // Setup the subject (object being tracked);
+  // Setup the subject (object being tracked).
   $subject = new Snowplow\Tracker\Subject();
   // Set user ID on the this object.
   $subject->setUserId($user->uid);
@@ -132,5 +134,3 @@ function snowplow_get_api_object() {
 
   return $tracker;
 }
-
-

@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Snowplow module install.
+ */
+
+/**
  * Implements hook_install().
  */
 function snowplow_install() {
