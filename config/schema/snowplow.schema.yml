@@ -4,9 +4,9 @@ snowplow.settings:
   type: config_object
   label: 'Snowplow settings'
   mapping:
-    app_endpoint:
-      type: string
     app_id:
+      type: string
+    app_endpoint:
       type: string
     track_logins:
       type: boolean
@@ -14,3 +14,5 @@ snowplow.settings:
       type: boolean
     track_new_user:
       type: boolean
+    trackmessages:
+      type: string

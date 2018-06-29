@@ -6,25 +6,6 @@
  */
 
 /**
- * Implements hook_menu().
- */
-function snowplow_menu() {
-  $items = array();
-
-  $items['admin/config/system/snowplow'] = array(
-    'title' => 'Snowplow Analytics',
-    'description' => 'Configure tracking behavior for snowplow analytics.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('snowplow_admin_settings_form'),
-    'access arguments' => array('administer snowplow analytics'),
-    'type' => MENU_NORMAL_ITEM,
-    'file' => 'snowplow.admin.inc',
-  );
-
-  return $items;
-}
-
-/**
  * Implements hook_libraries_info().
  */
 function snowplow_libraries_info() {
