@@ -9,17 +9,17 @@
  * Implements hook_libraries_info().
  */
 function snowplow_libraries_info() {
-  $libraries['snowplow'] = array(
+  $libraries['snowplow'] = [
     'name' => 'Snowplow Analytics Tracker',
     'vendor url' => 'https://github.com/snowplow/snowplow-php-tracker',
     'download url' => 'https://github.com/snowplow/snowplow-php-tracker/archive/master.zip',
-    'version arguments' => array(
+    'version arguments' => [
       'file' => 'CHANGELOG',
       'pattern' => "@Version\s+([0-9a-zA-Z\.-]+)@",
       'lines' => 5,
-    ),
-    'files' => array(
-      'php' => array(
+    ],
+    'files' => [
+      'php' => [
         'src/Constants.php',
         'src/Emitter.php',
         'src/Payload.php',
@@ -30,9 +30,9 @@ function snowplow_libraries_info() {
         'src/Emitters/SocketEmitter.php',
         'src/Emitters/SyncEmitter.php',
         'vendor/autoload.php',
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 
   return $libraries;
 }
@@ -84,7 +84,7 @@ function snowplow_get_api_object() {
   $library = libraries_load('snowplow');
   if (!$library['installed']) {
     $msg = t('Failed to load Snowplow PHP library. Please refer to the installation requirements.');
-    watchdog('snowplow', $msg, array(), WATCHDOG_ERROR);
+    watchdog('snowplow', $msg, [], WATCHDOG_ERROR);
     drupal_set_message($msg, 'error', FALSE);
     return NULL;
   }

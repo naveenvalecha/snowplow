@@ -22,7 +22,7 @@ class SnowplowJsSettingsForm extends ConfigFormBase {
   protected $configFactory;
 
   /**
-   * Constructs a \Drupal\aggregator\SettingsForm object.
+   * Constructs a \Drupal\snowplow_js\SettingsForm object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
@@ -38,13 +38,6 @@ class SnowplowJsSettingsForm extends ConfigFormBase {
     return new static(
       $container->get('config.factory')
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getEditableConfigNames() {
-    return ['snowplow.settings'];
   }
 
   /**
@@ -170,6 +163,13 @@ class SnowplowJsSettingsForm extends ConfigFormBase {
       ->save();
 
     parent::submitForm($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEditableConfigNames() {
+    return ['snowplow.settings'];
   }
 
 }
