@@ -1,8 +1,0 @@
-name = Snowplow Analytics Commerce Tracker
-description = Implmenents server side tracking for commerce orders/transactions for snowplow
-package = Statistics
-core = 7.x
-
-dependencies[] = snowplow
-
-configure = admin/config/system/snowplow/commerce
