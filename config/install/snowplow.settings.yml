@@ -1,0 +1,5 @@
+app_endpoint: ''
+app_id: ''
+track_logins: TRUE
+track_logout: TRUE
+track_new_user: TRUE
