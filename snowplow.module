@@ -73,18 +73,6 @@ function snowplow_user_logout($account) {
 }
 
 /**
- * Implements hook_permission().
- */
-function snowplow_permission() {
-  return array(
-    'administer snowplow analytics' => array(
-      'title' => t('Administer Snowplow Analytics'),
-      'description' => t('Change the tracking settings for Snowplow analytics.'),
-    ),
-  );
-}
-
-/**
  * Get an instance of the Snoplow API tracker object.
  *
  * @return object
